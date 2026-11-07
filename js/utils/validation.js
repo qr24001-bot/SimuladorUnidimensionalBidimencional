@@ -1,6 +1,6 @@
 import { CAMPOS_POR_MOVIMIENTO, LIMITE_ABSOLUTO } from './constantes.js';
 
-const ETIQUETAS = {
+export const ETIQUETAS = {
   x0: 'Posición inicial x₀',
   y0: 'Altura inicial y₀',
   v: 'Velocidad v',
