@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Demo del panel | Simulador Unidimensional Bidimensional</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <main class="contenedor">
+    <h1>Demo del panel de resultados y ecuaciones</h1>
+    <p class="subtitulo">Datos de ejemplo escritos a mano, no vienen de los motores.</p>
+
+    <section class="panel">
+      <h2>Resultados</h2>
+      <div class="tabla-contenedor">
+        <table id="tabla-resultados" class="tabla">
+          <thead><tr><th>Magnitud</th><th>Valor</th><th>Unidad</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Ecuaciones aplicadas</h2>
+      <div id="panel-ecuaciones" class="panel-ecuaciones"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { mostrarResultados, mostrarEcuaciones } from '../js/utils/panel.js';
+
+    mostrarResultados([
+      { etiqueta: 'Posición final', valor: 150, unidad: 'm' },
+      { etiqueta: 'Velocidad final', valor: 25, unidad: 'm/s' }
+    ]);
+
+    mostrarEcuaciones('mrua', { x0: 0, v0: 5, a: 2, t: 10 }, [
+      {
+        ecuacion: 'x = x₀ + v₀·t + ½·a·t²',
+        sustitucion: 'x = 0 + 5(10) + ½(2)(10)²',
+        resultado: 'x = 150 m'
+      },
+      {
+        ecuacion: 'v = v₀ + a·t',
+        sustitucion: 'v = 5 + 2(10)',
+        resultado: 'v = 25 m/s'
+      }
+    ]);
+  </script>
+</body>
+</html>

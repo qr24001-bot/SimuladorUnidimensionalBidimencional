@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Movimiento en 1D | Simulador Unidimensional Bidimensional</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="pagina-simulador" data-modo="1d">
+
+  <header class="encabezado encabezado-compacto">
+    <div class="contenedor">
+      <nav class="navegacion" aria-label="Navegación principal">
+        <a href="../index.html">Inicio</a>
+        <a href="unidimensional.html" aria-current="page">Movimiento 1D</a>
+        <a href="bidimensional.html">Movimiento 2D</a>
+      </nav>
+      <h1>Movimiento en 1D</h1>
+      <p class="subtitulo">MRU, MRUA, caída libre y lanzamiento vertical.</p>
+    </div>
+  </header>
+
+  <main class="contenedor">
+
+    <!-- Zona 1: parámetros -->
+    <section class="panel" aria-labelledby="titulo-parametros">
+      <h2 id="titulo-parametros">1. Parámetros</h2>
+
+      <form id="formulario-datos" novalidate autocomplete="off">
+
+        <div class="campo campo-ancho">
+          <label for="sel-movimiento">Tipo de movimiento</label>
+          <select id="sel-movimiento" name="movimiento">
+            <option value="mru">Movimiento rectilíneo uniforme (MRU)</option>
+            <option value="mrua" selected>Movimiento rectilíneo uniformemente acelerado (MRUA)</option>
+            <option value="caida-libre">Caída libre</option>
+            <option value="lanzamiento-vertical">Lanzamiento vertical</option>
+          </select>
+        </div>
+
+        <div class="rejilla-campos">
+
+          <div class="campo" data-movimientos="mru mrua">
+            <label for="campo-x0">Posición inicial x₀ <span class="unidad">(m)</span></label>
+            <input type="text" id="campo-x0" name="x0" inputmode="decimal" value="0">
+          </div>
+
+          <div class="campo" data-movimientos="caida-libre lanzamiento-vertical">
+            <label for="campo-y0">Altura inicial y₀ <span class="unidad">(m)</span></label>
+            <input type="text" id="campo-y0" name="y0" inputmode="decimal" value="0">
+          </div>
+
+          <div class="campo" data-movimientos="mru">
+            <label for="campo-v">Velocidad v <span class="unidad">(m/s)</span></label>
+            <input type="text" id="campo-v" name="v" inputmode="decimal" value="5">
+          </div>
+
+          <div class="campo" data-movimientos="mrua caida-libre lanzamiento-vertical">
+            <label for="campo-v0">Velocidad inicial v₀ <span class="unidad">(m/s)</span></label>
+            <input type="text" id="campo-v0" name="v0" inputmode="decimal" value="5">
+          </div>
+
+          <div class="campo" data-movimientos="mrua">
+            <label for="campo-a">Aceleración a <span class="unidad">(m/s²)</span></label>
+            <input type="text" id="campo-a" name="a" inputmode="decimal" value="2">
+          </div>
+
+          <div class="campo" data-movimientos="caida-libre lanzamiento-vertical">
+            <label for="campo-g">Gravedad g <span class="unidad">(m/s²)</span></label>
+            <input type="text" id="campo-g" name="g" inputmode="decimal" value="9,81">
+          </div>
+
+          <div class="campo" data-movimientos="mru mrua">
+            <label for="campo-t">Tiempo t <span class="unidad">(s)</span></label>
+            <input type="text" id="campo-t" name="t" inputmode="decimal" value="10">
+          </div>
+
+        </div>
+
+        <ul id="lista-errores" class="lista-errores" role="alert" hidden></ul>
+
+        <button type="submit" class="boton">Simular</button>
+      </form>
+    </section>
+
+    <!-- Zona 2: simulación -->
+    <section class="panel" aria-labelledby="titulo-simulacion">
+      <h2 id="titulo-simulacion">2. Simulación</h2>
+
+      <canvas id="canvas-simulacion" width="800" height="360"
+              aria-label="Animación del movimiento de la partícula"></canvas>
+
+      <div class="controles">
+        <button type="button" id="btn-iniciar" class="boton">Iniciar</button>
+        <button type="button" id="btn-pausar" class="boton boton-secundario">Pausar</button>
+        <button type="button" id="btn-reiniciar" class="boton boton-secundario">Reiniciar</button>
+
+        <label for="sel-velocidad" class="etiqueta-control">Velocidad</label>
+        <select id="sel-velocidad">
+          <option value="0.5">0,5×</option>
+          <option value="1" selected>1×</option>
+          <option value="2">2×</option>
+        </select>
+
+        <output id="lbl-tiempo" class="lectura-tiempo">t = 0,000 s</output>
+      </div>
+    </section>
+
+    <!-- Zona 3: resultados -->
+    <section class="panel" aria-labelledby="titulo-resultados">
+      <h2 id="titulo-resultados">3. Resultados</h2>
+      <div class="tabla-contenedor">
+        <table id="tabla-resultados" class="tabla">
+          <thead>
+            <tr><th>Magnitud</th><th>Valor</th><th>Unidad</th></tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="3" class="vacio">Presiona «Simular» para ver los resultados.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Zona 4: gráficas -->
+    <section class="panel" aria-labelledby="titulo-graficas">
+      <h2 id="titulo-graficas">4. Gráficas</h2>
+      <div id="contenedor-graficas" class="contenedor-graficas">
+        <p class="vacio">Las gráficas aparecerán aquí después de simular.</p>
+      </div>
+    </section>
+
+    <!-- Zona 5: ecuaciones -->
+    <section class="panel" aria-labelledby="titulo-ecuaciones">
+      <h2 id="titulo-ecuaciones">5. Ecuaciones aplicadas</h2>
+      <div id="panel-ecuaciones" class="panel-ecuaciones">
+        <p class="vacio">Aquí se mostrarán los datos, la ecuación, la sustitución y el resultado.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="pie">
+    <div class="contenedor">
+      <p>Proyecto universitario de Mecánica Clásica (Física I).</p>
+    </div>
+  </footer>
+
+  <script type="module" src="../js/main.js"></script>
+</body>
+</html>

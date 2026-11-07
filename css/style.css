@@ -1,0 +1,389 @@
+/* ===== Variables del tema oscuro ===== */
+:root {
+  color-scheme: dark;
+  --fondo: #0f172a;
+  --superficie: #1e293b;
+  --borde: #334155;
+  --texto: #e2e8f0;
+  --texto-suave: #94a3b8;
+  --acento: #38bdf8;
+  --acento-oscuro: #0c4a6e;
+  --radio: 12px;
+  --espacio: 1rem;
+}
+
+/* ===== Base ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.6;
+}
+
+h1, h2, h3 {
+  line-height: 1.25;
+  margin: 0 0 0.5rem;
+}
+
+h2 {
+  font-size: 1.35rem;
+  margin-top: 2rem;
+  color: var(--acento);
+}
+
+h3 {
+  font-size: 1.15rem;
+}
+
+p {
+  margin: 0 0 var(--espacio);
+}
+
+a {
+  color: var(--acento);
+}
+
+.contenedor {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 var(--espacio);
+}
+
+/* ===== Encabezado ===== */
+.encabezado {
+  background: linear-gradient(135deg, var(--acento-oscuro), var(--superficie));
+  border-bottom: 1px solid var(--borde);
+  padding: 2.5rem 0;
+}
+
+.encabezado h1 {
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+}
+
+.subtitulo {
+  color: var(--texto-suave);
+  max-width: 60ch;
+  margin: 0;
+}
+
+/* ===== Tarjetas ===== */
+.rejilla-tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--espacio);
+}
+
+.tarjeta {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.tarjeta p {
+  color: var(--texto-suave);
+  flex-grow: 1;
+}
+
+/* ===== Botón ===== */
+.boton {
+  display: inline-block;
+  align-self: flex-start;
+  background: var(--acento);
+  color: #06283d;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0.6rem 1.1rem;
+  border-radius: 8px;
+}
+
+.boton:hover,
+.boton:focus-visible {
+  filter: brightness(1.1);
+  outline: 2px solid var(--texto);
+  outline-offset: 2px;
+}
+
+/* ===== Listas ===== */
+.lista-movimientos,
+.lista-simple {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lista-movimientos li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--espacio);
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.etiqueta {
+  font-style: normal;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--acento);
+  border: 1px solid var(--acento);
+  border-radius: 999px;
+  padding: 0.1rem 0.65rem;
+}
+
+.lista-simple li {
+  padding: 0.35rem 0 0.35rem 1.25rem;
+  position: relative;
+  color: var(--texto-suave);
+}
+
+.lista-simple li::before {
+  content: "•";
+  color: var(--acento);
+  position: absolute;
+  left: 0;
+}
+
+/* ===== Pie de página ===== */
+.pie {
+  margin-top: 3rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--borde);
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+.pie p {
+  margin-bottom: 0.25rem;
+}
+/* ===== Páginas del simulador ===== */
+.encabezado-compacto {
+  padding: 1.25rem 0 1.5rem;
+}
+
+.navegacion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.navegacion a {
+  text-decoration: none;
+  color: var(--texto-suave);
+  padding-bottom: 0.15rem;
+  border-bottom: 2px solid transparent;
+}
+
+.navegacion a:hover,
+.navegacion a[aria-current="page"] {
+  color: var(--acento);
+  border-bottom-color: var(--acento);
+}
+
+.panel {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 1.25rem;
+  margin-top: var(--espacio);
+}
+
+.panel h2 {
+  margin-top: 0;
+}
+
+/* ===== Formulario ===== */
+.rejilla-campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--espacio);
+  margin: var(--espacio) 0;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.campo label,
+.etiqueta-control {
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.unidad {
+  color: var(--acento);
+}
+
+input[type="text"],
+select {
+  width: 100%;
+  background: var(--fondo);
+  color: var(--texto);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+}
+
+input[type="text"]:focus,
+select:focus {
+  outline: 2px solid var(--acento);
+  outline-offset: 1px;
+}
+
+input.invalido {
+  border-color: #f87171;
+}
+
+.lista-errores {
+  list-style: none;
+  margin: 0 0 var(--espacio);
+  padding: 0.75rem 1rem;
+  border: 1px solid #f87171;
+  border-radius: 8px;
+  background: #3b1d1d;
+  color: #fecaca;
+}
+
+.lista-errores[hidden] {
+  display: none;
+}
+
+button.boton {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+}
+
+.boton-secundario {
+  background: transparent;
+  color: var(--acento);
+  border: 1px solid var(--acento) !important;
+}
+
+/* ===== Simulación ===== */
+#canvas-simulacion {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #0b1220;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+}
+
+.controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: var(--espacio);
+}
+
+.controles select {
+  width: auto;
+}
+
+.lectura-tiempo {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--acento);
+}
+
+/* ===== Tabla, gráficas y ecuaciones ===== */
+.tabla-contenedor {
+  overflow-x: auto;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla th,
+.tabla td {
+  text-align: left;
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--borde);
+}
+
+.tabla th {
+  color: var(--acento);
+  font-size: 0.9rem;
+}
+
+.contenedor-graficas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--espacio);
+}
+
+.vacio {
+  color: var(--texto-suave);
+  font-style: italic;
+  margin: 0;
+}
+.campo[hidden] {
+  display: none;
+}
+/* ===== Panel de ecuaciones ===== */
+.panel-ecuaciones h3 {
+  margin-top: 0;
+}
+
+.panel-ecuaciones h4 {
+  margin: 1.25rem 0 0.4rem;
+  font-size: 0.9rem;
+  color: var(--acento);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.lista-datos {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--texto-suave);
+}
+
+.paso {
+  background: var(--fondo);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.linea-paso {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: 0.75rem;
+  margin: 0.2rem 0;
+}
+
+.nombre-paso {
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+}
+
+.texto-paso {
+  font-family: "Cambria Math", Consolas, monospace;
+  overflow-wrap: anywhere;
+}
