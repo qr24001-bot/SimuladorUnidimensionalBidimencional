@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simulador Unidimensional Bidimensional</title>
+  <meta name="description" content="Simulador educativo de cinemática en una y dos dimensiones.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="encabezado">
+    <div class="contenedor">
+      <h1>Simulador Unidimensional Bidimensional</h1>
+      <p class="subtitulo">
+        Ingresa los datos iniciales de una partícula y observa su movimiento,
+        sus gráficas, las ecuaciones aplicadas y los resultados con unidades.
+      </p>
+    </div>
+  </header>
+
+  <main class="contenedor">
+
+    <section aria-labelledby="titulo-modos">
+      <h2 id="titulo-modos">Elige un modo de simulación</h2>
+      <div class="rejilla-tarjetas">
+
+        <article class="tarjeta">
+          <h3>Movimiento en 1D</h3>
+          <p>Movimientos sobre una recta: MRU, MRUA, caída libre y lanzamiento vertical.</p>
+          <a class="boton" href="pages/unidimensional.html">Abrir simulador 1D</a>
+        </article>
+
+        <article class="tarjeta">
+          <h3>Movimiento en 2D</h3>
+          <p>Movimientos en el plano: lanzamiento horizontal y lanzamiento parabólico.</p>
+          <a class="boton" href="pages/bidimensional.html">Abrir simulador 2D</a>
+        </article>
+
+      </div>
+    </section>
+
+    <section aria-labelledby="titulo-movimientos">
+      <h2 id="titulo-movimientos">Movimientos incluidos</h2>
+      <ul class="lista-movimientos">
+        <li><span>Movimiento rectilíneo uniforme (MRU)</span><em class="etiqueta">1D</em></li>
+        <li><span>Movimiento rectilíneo uniformemente acelerado (MRUA)</span><em class="etiqueta">1D</em></li>
+        <li><span>Caída libre</span><em class="etiqueta">1D</em></li>
+        <li><span>Lanzamiento vertical</span><em class="etiqueta">1D</em></li>
+        <li><span>Lanzamiento horizontal</span><em class="etiqueta">2D</em></li>
+        <li><span>Lanzamiento parabólico</span><em class="etiqueta">2D</em></li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="titulo-convenciones">
+      <h2 id="titulo-convenciones">Convenciones utilizadas</h2>
+      <ul class="lista-simple">
+        <li>Eje X positivo hacia la derecha y eje Y positivo hacia arriba.</li>
+        <li>El suelo se encuentra en y = 0.</li>
+        <li>Unidades del Sistema Internacional: m, m/s, m/s² y s.</li>
+        <li>Gravedad predeterminada: g = 9,81 m/s².</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer class="pie">
+    <div class="contenedor">
+      <p>Proyecto universitario de Mecánica Clásica (Física I).</p>
+      <p>
+        <a href="https://github.com/qr24001-bot/SimuladorUnidimensionalBidimencional">
+          Código fuente en GitHub
+        </a>
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>
