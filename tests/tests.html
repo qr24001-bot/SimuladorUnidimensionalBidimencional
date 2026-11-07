@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pruebas | Simulador Unidimensional Bidimensional</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .lista-pruebas { list-style: none; padding: 0; }
+    .lista-pruebas li { padding: 0.35rem 0; border-bottom: 1px solid var(--borde); }
+    .ok { color: #4ade80; }
+    .fallo { color: #f87171; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <main class="contenedor">
+    <h1>Pruebas automáticas de las validaciones</h1>
+    <p class="subtitulo">Cada línea es un caso. Verde: pasó. Rojo: falló.</p>
+    <ul id="resultados" class="lista-pruebas"></ul>
+  </main>
+  <script type="module" src="./tests.js"></script>
+</body>
+</html>
