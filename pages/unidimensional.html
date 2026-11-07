@@ -1,0 +1,9 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SIMUCIN — Cinemática 1D</title><link rel="stylesheet" href="../css/style.css"></head><body>
+<header><a href="../index.html">SIMUCIN</a><nav><a href="unidimensional.html">Cinemática 1D</a><a href="bidimensional.html">Cinemática 2D</a></nav></header>
+<main><section class="card"><h2>Cinemática 1D · Parámetros</h2><select id="mov"></select><form id="form" novalidate></form><ul id="errores" class="err"></ul></section>
+<section class="card"><h2>Simulación</h2><canvas id="cv"></canvas><div class="ctl"><button id="ini">Iniciar</button><button id="pau">Pausar</button><button id="rea">Reanudar</button><button id="rei">Reiniciar</button>
+<select id="vel"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select><span id="tiempo"></span></div></section>
+<section class="card"><h2>Resultados</h2><table id="res"></table></section>
+<section class="card wide"><h2>Gráficas</h2><div id="graf" class="graf"></div></section>
+<section class="card wide"><h2>Análisis matemático</h2><div id="ana"></div></section></main>
+<script src="../js/vendor/chart.umd.js"></script><script type="module">import { iniciar } from '../js/main.js'; iniciar(1);</script></body></html>
