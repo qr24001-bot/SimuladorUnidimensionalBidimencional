@@ -1,6 +1,16 @@
-import { iniciarFormulario } from './utils/formulario.js';
+import { iniciarFormulario, mostrarErrores, limpiarErrores } from './utils/formulario.js';
+import { validar } from './utils/validation.js';
 
-iniciarFormulario((movimiento, datos) => {
-  // Temporal: en el Paso 6 se validará y luego se conectará con los motores.
-  console.log('Movimiento:', movimiento, 'Datos crudos:', datos);
+iniciarFormulario((movimiento, crudos) => {
+  const resultado = validar(movimiento, crudos);
+
+  if (!resultado.valido) {
+    mostrarErrores(resultado.errores);
+    return;
+  }
+
+  limpiarErrores();
+
+  // Temporal: en el siguiente paso se conectará con los motores.
+  console.log('Movimiento:', movimiento, 'Datos válidos:', resultado.datos);
 });

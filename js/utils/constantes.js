@@ -12,3 +12,4 @@ export const CAMPOS_POR_MOVIMIENTO = {
   'lanzamiento-horizontal': ['x0', 'y0', 'vx', 'g'],
   'lanzamiento-parabolico': ['x0', 'y0', 'v0', 'ang', 'g']
 };
+export const LIMITE_ABSOLUTO = 1e6; // valor máximo aceptado (en valor absoluto)
