@@ -341,3 +341,6 @@ button.boton {
   font-style: italic;
   margin: 0;
 }
+.campo[hidden] {
+  display: none;
+}
