@@ -170,3 +170,174 @@ a {
 .pie p {
   margin-bottom: 0.25rem;
 }
+/* ===== Páginas del simulador ===== */
+.encabezado-compacto {
+  padding: 1.25rem 0 1.5rem;
+}
+
+.navegacion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.navegacion a {
+  text-decoration: none;
+  color: var(--texto-suave);
+  padding-bottom: 0.15rem;
+  border-bottom: 2px solid transparent;
+}
+
+.navegacion a:hover,
+.navegacion a[aria-current="page"] {
+  color: var(--acento);
+  border-bottom-color: var(--acento);
+}
+
+.panel {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 1.25rem;
+  margin-top: var(--espacio);
+}
+
+.panel h2 {
+  margin-top: 0;
+}
+
+/* ===== Formulario ===== */
+.rejilla-campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--espacio);
+  margin: var(--espacio) 0;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.campo label,
+.etiqueta-control {
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.unidad {
+  color: var(--acento);
+}
+
+input[type="text"],
+select {
+  width: 100%;
+  background: var(--fondo);
+  color: var(--texto);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+}
+
+input[type="text"]:focus,
+select:focus {
+  outline: 2px solid var(--acento);
+  outline-offset: 1px;
+}
+
+input.invalido {
+  border-color: #f87171;
+}
+
+.lista-errores {
+  list-style: none;
+  margin: 0 0 var(--espacio);
+  padding: 0.75rem 1rem;
+  border: 1px solid #f87171;
+  border-radius: 8px;
+  background: #3b1d1d;
+  color: #fecaca;
+}
+
+.lista-errores[hidden] {
+  display: none;
+}
+
+button.boton {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+}
+
+.boton-secundario {
+  background: transparent;
+  color: var(--acento);
+  border: 1px solid var(--acento) !important;
+}
+
+/* ===== Simulación ===== */
+#canvas-simulacion {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #0b1220;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+}
+
+.controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: var(--espacio);
+}
+
+.controles select {
+  width: auto;
+}
+
+.lectura-tiempo {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--acento);
+}
+
+/* ===== Tabla, gráficas y ecuaciones ===== */
+.tabla-contenedor {
+  overflow-x: auto;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla th,
+.tabla td {
+  text-align: left;
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--borde);
+}
+
+.tabla th {
+  color: var(--acento);
+  font-size: 0.9rem;
+}
+
+.contenedor-graficas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--espacio);
+}
+
+.vacio {
+  color: var(--texto-suave);
+  font-style: italic;
+  margin: 0;
+}
