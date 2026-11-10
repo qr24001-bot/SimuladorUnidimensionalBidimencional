@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SIMUCIN · Demo 2D</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --plano: #f9f9f7; --superficie: #fcfcfb; --tinta: #0b0b0b; --tinta-2: #52514e; --suave: #898781;
+    --rejilla: #e1e0d9; --eje: #c3c2b7; --borde: rgba(11, 11, 11, .10);
+    --acento: #256abf; --acento-texto: #ffffff; --acento-suave: rgba(37, 106, 191, .08);
+    --error: #d03b3b; --error-fondo: rgba(208, 59, 59, .07);
+    --sombra: 0 1px 2px rgba(11, 11, 11, .05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --plano: #0d0d0d; --superficie: #1a1a19; --tinta: #f0efec; --tinta-2: #c3c2b7; --suave: #898781;
+      --rejilla: #2c2c2a; --eje: #383835; --borde: rgba(255, 255, 255, .10);
+      --acento: #3987e5; --acento-texto: #0b0b0b; --acento-suave: rgba(57, 135, 229, .12);
+      --error: #e66767; --error-fondo: rgba(230, 103, 103, .12); --sombra: none;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--plano); color: var(--tinta); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+
+  /* Barra superior */
+  .barra { background: var(--superficie); border-bottom: 1px solid var(--borde); }
+  .barra-in { max-width: 1200px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; gap: 4px 14px; flex-wrap: wrap; }
+  .marca { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 18px; font-weight: 700; letter-spacing: .06em; }
+  .marca svg { width: 30px; height: 30px; }
+  .lema { color: var(--tinta-2); font-size: 14px; }
+  .insignia { margin-left: auto; font-size: 12px; color: var(--tinta-2); border: 1px solid var(--borde); border-radius: 999px; padding: 2px 10px; }
+
+  /* Estructura: escritorio (panel fijo a la izquierda) */
+  .contenido { max-width: 1200px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 24px; align-items: start; }
+  .tarjeta { background: var(--superficie); border: 1px solid var(--borde); border-radius: 12px; padding: 20px; box-shadow: var(--sombra); }
+  /* El panel se queda a la vista al bajar y, si no cabe en la pantalla, hace scroll por dentro */
+  .lateral { position: sticky; top: 16px; max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow-y: auto; overscroll-behavior: contain; }
+  .lateral-cab { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .lateral-cab h2, .seccion > h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--tinta-2); }
+  .seccion { margin-bottom: 28px; }
+  .seccion > h2 { margin-bottom: 12px; }
+  #vista { scroll-margin-top: 8px; transition: opacity .2s; }
+  #vista.viejo { opacity: .45; } /* hay errores: lo que se ve es de la última simulación válida */
+
+  /* Controles solo para teléfono */
+  .barra-movil, .cerrar, .fondo { display: none; }
+
+  /* Formulario */
+  .campo { margin-bottom: 14px; }
+  .campo label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; }
+  .entrada { display: flex; align-items: stretch; background: var(--superficie); border: 1px solid var(--eje); border-radius: 8px; }
+  .entrada:focus-within { outline: 2px solid var(--acento); outline-offset: 1px; }
+  .entrada input { flex: 1; min-width: 0; padding: 9px 12px; border: 0; background: transparent; color: inherit; font: inherit; outline: none; }
+  .entrada span { display: flex; align-items: center; padding: 0 12px; border-left: 1px solid var(--rejilla); color: var(--tinta-2); font-size: 13px; }
+  select { width: 100%; padding: 9px 12px; background: var(--superficie); color: inherit; font: inherit; border: 1px solid var(--eje); border-radius: 8px; }
+  select:focus-visible, button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+  .acciones { display: flex; gap: 10px; margin-top: 20px; }
+  button { padding: 9px 16px; font: inherit; font-weight: 600; border: 1px solid transparent; border-radius: 8px; cursor: pointer; }
+  .primario { flex: 1; background: var(--acento); color: var(--acento-texto); }
+  .primario:hover { filter: brightness(1.1); }
+  .secundario { background: transparent; color: var(--tinta); border-color: var(--eje); }
+  .secundario:hover { background: var(--rejilla); }
+
+  /* Errores (junto a los campos) */
+  #lista-errores { list-style: none; margin: 16px 0 0; padding: 0; }
+  #lista-errores:empty { display: none; }
+  #lista-errores li { display: flex; gap: 10px; margin-top: 8px; padding: 10px 14px; background: var(--error-fondo); border: 1px solid var(--error); border-radius: 8px; font-size: 14px; }
+  #lista-errores li::before { content: "⚠"; color: var(--error); }
+
+  /* Resultados */
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); gap: 12px; margin: 0; }
+  .kpi { padding: 14px 16px; background: var(--superficie); border: 1px solid var(--borde); border-radius: 12px; box-shadow: var(--sombra); }
+  .kpi dt { color: var(--tinta-2); font-size: 13px; }
+  .kpi dd { margin: 4px 0 0; font-size: clamp(22px, 5vw, 28px); font-weight: 600; line-height: 1.15; }
+  .kpi small { margin-left: 4px; color: var(--tinta-2); font-size: 14px; font-weight: 500; }
+
+  /* Ecuaciones */
+  .ecuaciones { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 12px; }
+  .ecuacion { padding: 14px 16px; background: var(--superficie); border: 1px solid var(--borde); border-left: 3px solid var(--acento); border-radius: 12px; box-shadow: var(--sombra); }
+  .ecuacion p { margin: 0; overflow-wrap: anywhere; }
+  .eq { font-weight: 600; }
+  .sust { margin: 4px 0 !important; color: var(--tinta-2); font: 13px/1.5 ui-monospace, "Cascadia Code", Consolas, monospace; }
+  .res { color: var(--acento); font-weight: 700; }
+
+  /* Gráficas: la primera (trayectoria) ocupa todo el ancho */
+  #contenedor-graficas { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; }
+  .grafica { min-width: 0; padding: 16px; background: var(--superficie); border: 1px solid var(--borde); border-radius: 12px; box-shadow: var(--sombra); }
+  .grafica:first-child { grid-column: 1 / -1; }
+
+  .pie { max-width: 1200px; margin: 0 auto; padding: 8px 24px 32px; color: var(--suave); font-size: 13px; }
+
+  /* Tableta y laptop pequeña: panel más angosto, sigue a la izquierda */
+  @media (max-width: 1023px) {
+    .contenido { grid-template-columns: 280px minmax(0, 1fr); gap: 16px; padding: 16px; }
+    .barra-in, .pie { padding-left: 16px; padding-right: 16px; }
+  }
+
+  /* Teléfono: una columna y el panel pasa a ser una hoja inferior que se abre con un botón siempre visible */
+  @media (max-width: 759px) {
+    body { padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
+    .contenido { grid-template-columns: minmax(0, 1fr); }
+    .lema { font-size: 13px; }
+    .grafica { padding: 12px; }
+    .barra-movil {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; width: auto;
+      position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 10;
+      padding: 12px 16px; background: var(--acento); color: var(--acento-texto); border-radius: 12px; box-shadow: 0 4px 16px rgba(0, 0, 0, .25);
+    }
+    .barra-movil small { font-size: 13px; font-weight: 500; opacity: .9; }
+    .lateral {
+      position: fixed; top: auto; left: 0; right: 0; bottom: 0; z-index: 30; max-height: 88vh; max-height: 88dvh;
+      padding-bottom: calc(20px + env(safe-area-inset-bottom)); border-radius: 16px 16px 0 0;
+      transform: translateY(100%); visibility: hidden; transition: transform .25s ease, visibility 0s linear .25s;
+    }
+    .lateral.abierto { transform: none; visibility: visible; transition: transform .25s ease; }
+    .fondo { display: block; position: fixed; inset: 0; z-index: 25; background: rgba(0, 0, 0, .45); }
+    .cerrar { display: inline-flex; padding: 4px 10px; background: transparent; color: var(--tinta-2); font-size: 18px; line-height: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) { .lateral, #vista { transition: none !important; } }
+
+  /* Pantallas táctiles: zonas de toque de 44 px y 16 px en campos (evita el zoom automático de iOS) */
+  @media (pointer: coarse) {
+    .entrada input, select, button { min-height: 44px; font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+<header class="barra">
+  <div class="barra-in">
+    <h1 class="marca">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="8" style="fill: var(--acento)"/>
+        <path d="M6 24 Q16 2 26 24" fill="none" stroke-width="2.5" stroke-linecap="round" style="stroke: var(--acento-texto)"/>
+        <circle cx="26" cy="24" r="2.5" style="fill: var(--acento-texto)"/>
+      </svg>
+      SIMUCIN
+    </h1>
+    <span class="lema">Simulador de cinemática · Movimiento en 2D</span>
+    <span class="insignia">Demo local</span>
+  </div>
+</header>
+
+<main class="contenido">
+  <aside class="tarjeta lateral" id="panel-parametros">
+    <div class="lateral-cab">
+      <h2>Parámetros</h2>
+      <button type="button" class="cerrar" id="btn-cerrar" aria-label="Cerrar parámetros">✕</button>
+    </div>
+    <form id="formulario-datos" novalidate>
+      <div class="campo">
+        <label for="sel-movimiento">Tipo de movimiento</label>
+        <select id="sel-movimiento">
+          <option value="horizontal">Lanzamiento horizontal</option>
+          <option value="parabolico" selected>Lanzamiento parabólico</option>
+        </select>
+      </div>
+      <div class="campo" data-mov="horizontal parabolico">
+        <label for="x0">Posición inicial x₀</label>
+        <div class="entrada"><input id="x0" name="x0" type="number" step="any" value="0"><span>m</span></div>
+      </div>
+      <div class="campo" data-mov="horizontal parabolico">
+        <label for="y0">Altura inicial y₀</label>
+        <div class="entrada"><input id="y0" name="y0" type="number" step="any" value="10"><span>m</span></div>
+      </div>
+      <div class="campo" data-mov="horizontal">
+        <label for="vx">Velocidad horizontal vₓ</label>
+        <div class="entrada"><input id="vx" name="vx" type="number" step="any" value="10"><span>m/s</span></div>
+      </div>
+      <div class="campo" data-mov="parabolico">
+        <label for="v0">Velocidad inicial v₀</label>
+        <div class="entrada"><input id="v0" name="v0" type="number" step="any" value="20"><span>m/s</span></div>
+      </div>
+      <div class="campo" data-mov="parabolico">
+        <label for="ang">Ángulo de lanzamiento θ</label>
+        <div class="entrada"><input id="ang" name="ang" type="number" step="any" value="30"><span>°</span></div>
+      </div>
+      <div class="campo" data-mov="horizontal parabolico">
+        <label for="g">Gravedad g</label>
+        <div class="entrada"><input id="g" name="g" type="number" step="any" value="9.81"><span>m/s²</span></div>
+      </div>
+      <div class="acciones">
+        <button type="submit" class="primario">Simular</button>
+        <button type="reset" class="secundario">Restablecer</button>
+      </div>
+    </form>
+    <ul id="lista-errores" role="alert"></ul>
+  </aside>
+
+  <div id="vista" hidden>
+    <section class="seccion">
+      <h2>Resultados</h2>
+      <dl id="tabla-resultados" class="kpis"></dl>
+    </section>
+    <section class="seccion">
+      <h2>Ecuaciones</h2>
+      <div id="panel-ecuaciones" class="ecuaciones"></div>
+    </section>
+    <section class="seccion">
+      <h2>Gráficas</h2>
+      <div id="contenedor-graficas"></div>
+    </section>
+  </div>
+</main>
+<footer class="pie">Página de prueba de los motores y gráficas 2D (no es la interfaz final). Chart.js se carga desde un CDN.</footer>
+
+<button type="button" class="barra-movil" id="btn-parametros" aria-controls="panel-parametros" aria-expanded="false">
+  <span>Parámetros</span><small id="resumen"></small>
+</button>
+<div class="fondo" id="fondo" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="../js/physics/lanzamiento-horizontal.js"></script>
+<script src="../js/physics/lanzamiento-parabolico.js"></script>
+<script src="../js/charts/graphs.js"></script>
+<script>
+  const $ = id => document.getElementById(id);
+  const form = $('formulario-datos'), sel = $('sel-movimiento'), panel = $('panel-parametros');
+  const movil = matchMedia('(max-width: 759px)');
+  const MOTORES = { horizontal: SIMUCIN.crearLanzamientoHorizontal, parabolico: SIMUCIN.crearLanzamientoParabolico };
+
+  // Muestra solo los campos del movimiento elegido (los ocultos se desactivan y no entran al objeto de datos).
+  function mostrarCampos() {
+    form.querySelectorAll('[data-mov]').forEach(campo => {
+      const activo = campo.dataset.mov.split(' ').includes(sel.value);
+      campo.hidden = !activo;
+      campo.querySelector('input').disabled = !activo;
+    });
+    $('resumen').textContent = sel.selectedOptions[0].text;
+  }
+
+  // Hoja inferior del teléfono (en pantallas grandes el panel siempre está a la vista y esto no hace nada).
+  function abrir(si) {
+    panel.classList.toggle('abierto', si);
+    $('fondo').hidden = !si;
+    $('btn-parametros').setAttribute('aria-expanded', si);
+    if (si) sel.focus();
+  }
+
+  // La validación real es de utils/validation.js; esta es solo para la demo.
+  function validar(d, mov) {
+    if (Object.values(d).some(Number.isNaN)) return ['Completa todos los campos con números.'];
+    const e = [];
+    if (d.y0 < 0) e.push('La altura inicial no puede ser negativa.');
+    if (mov === 'horizontal' && d.y0 === 0) e.push('En el lanzamiento horizontal la altura inicial debe ser mayor que 0.');
+    if (d.g <= 0) e.push('La gravedad debe ser mayor que 0.');
+    if (mov === 'parabolico') {
+      if (d.v0 < 0) e.push('La velocidad inicial no puede ser negativa.');
+      if (d.ang < 0 || d.ang > 90) e.push('El ángulo debe estar entre 0° y 90°.');
+    }
+    return e;
+  }
+
+  // Devuelve true si la simulación fue válida.
+  function simular() {
+    const mov = sel.value;
+    const datos = Object.fromEntries([...new FormData(form)].map(([k, v]) => [k, parseFloat(v)]));
+    let errores = validar(datos, mov), motor;
+    if (!errores.length) {
+      motor = MOTORES[mov](datos);
+      if (!(motor.duracion() > 0)) errores = ['Con estos datos no hay movimiento (la duración es 0).'];
+    }
+    $('lista-errores').innerHTML = errores.map(m => `<li>${m}</li>`).join('');
+    $('vista').classList.toggle('viejo', errores.length > 0);
+    if (errores.length) return false;
+
+    $('vista').hidden = false;
+    $('tabla-resultados').innerHTML = motor.resultados()
+      .map(r => `<div class="kpi"><dt>${r.etiqueta}</dt><dd>${r.valor.toFixed(3)}<small>${r.unidad}</small></dd></div>`).join('');
+    $('panel-ecuaciones').innerHTML = motor.ecuaciones()
+      .map(q => `<article class="ecuacion"><p class="eq">${q.ecuacion}</p><p class="sust">${q.sustitucion}</p><p class="res">${q.resultado}</p></article>`).join('');
+    SIMUCIN.graficar2D(motor, 'contenedor-graficas');
+    return true;
+  }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const ok = simular();
+    if (!movil.matches) return;
+    abrir(!ok); // teléfono: si hubo errores la hoja sigue abierta; si no, se cierra y se muestran los resultados
+    if (ok) $('vista').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  sel.addEventListener('change', () => { mostrarCampos(); simular(); });
+  form.addEventListener('reset', () => setTimeout(() => { mostrarCampos(); simular(); }));
+  $('btn-parametros').addEventListener('click', () => abrir(true));
+  $('btn-cerrar').addEventListener('click', () => abrir(false));
+  $('fondo').addEventListener('click', () => abrir(false));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') abrir(false); });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', simular); // repinta las gráficas con el otro tema
+  movil.addEventListener('change', () => { abrir(false); simular(); });             // al girar o cambiar de tamaño
+  mostrarCampos();
+  simular();
+</script>
+</body>
+</html>
