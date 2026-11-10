@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demo 2D (prueba local)</title>
+<style>
+  body { font-family: sans-serif; max-width: 760px; margin: 1rem auto; padding: 0 1rem; }
+  label { display: inline-block; margin: .2rem .8rem .2rem 0; }
+  input { width: 5rem; }
+  table { border-collapse: collapse; margin: .8rem 0; }
+  td { border: 1px solid #999; padding: .2rem .7rem; }
+  #lista-errores { color: #b00; }
+</style>
+</head>
+<body>
+<h1>Demo 2D — prueba local</h1>
+<p>Página solo para probar los motores y las gráficas 2D (no es la interfaz final).</p>
+
+<select id="sel-movimiento">
+  <option value="horizontal">Lanzamiento horizontal</option>
+  <option value="parabolico" selected>Lanzamiento parabólico</option>
+</select>
+<form id="formulario-datos">
+  <label>x0 (m) <input name="x0" value="0"></label>
+  <label>y0 (m) <input name="y0" value="10"></label>
+  <label>vx (m/s) <input name="vx" value="10"></label>
+  <label>v0 (m/s) <input name="v0" value="20"></label>
+  <label>ang (°) <input name="ang" value="30"></label>
+  <label>g (m/s²) <input name="g" value="9.81"></label>
+  <button>Simular</button>
+</form>
+<p id="lista-errores"></p>
+<table id="tabla-resultados"></table>
+<div id="panel-ecuaciones"></div>
+<div id="contenedor-graficas"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="../js/physics/lanzamiento-horizontal.js"></script>
+<script src="../js/physics/lanzamiento-parabolico.js"></script>
+<script src="../js/charts/graphs.js"></script>
+<script>
+  const $ = id => document.getElementById(id);
+  const form = $('formulario-datos');
+  const motores = { horizontal: SIMUCIN.crearLanzamientoHorizontal, parabolico: SIMUCIN.crearLanzamientoParabolico };
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const datos = Object.fromEntries([...new FormData(form)].map(([k, v]) => [k, parseFloat(v)]));
+    const motor = motores[$('sel-movimiento').value](datos);
+    // La validación real es de utils/validation.js; aquí solo evitamos graficar NaN.
+    if (!isFinite(motor.duracion())) { $('lista-errores').textContent = 'Datos inválidos (¿altura negativa o vacía?)'; return; }
+    $('lista-errores').textContent = '';
+    $('tabla-resultados').innerHTML = motor.resultados()
+      .map(r => `<tr><td>${r.etiqueta}</td><td>${r.valor.toFixed(3)} ${r.unidad}</td></tr>`).join('');
+    $('panel-ecuaciones').innerHTML = motor.ecuaciones()
+      .map(q => `<p><b>${q.ecuacion}</b><br>${q.sustitucion}<br><b>${q.resultado}</b></p>`).join('');
+    SIMUCIN.graficar2D(motor, 'contenedor-graficas');
+  });
+  form.requestSubmit(); // simula al abrir la página
+</script>
+</body>
+</html>
