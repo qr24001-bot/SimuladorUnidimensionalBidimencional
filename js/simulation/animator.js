@@ -1,6 +1,7 @@
 // simulation/animator.js
 // Anima un motor físico. Separa el tiempo físico del tiempo real usando
-// un paso fijo (DT) y un acumulador.
+// un paso fijo (DT) y un acumulador. Para que el movimiento se vea fluido,
+// el dibujo interpola con el tiempo que sobra del acumulador.
 //
 // Un "motor" es cualquier objeto con:
 //   motor.tiempoTotal      -> duración de la simulación en segundos
@@ -20,6 +21,7 @@ class Animator {
     this._ultimoReal = null;
     this._idFrame = null;
     this._bucle = this._bucle.bind(this);
+    this._ajustarEscala();
     this._dibujar();           // muestra la posición inicial (t = 0)
   }
 
@@ -37,11 +39,10 @@ class Animator {
   }
 
   // Vuelve a t = 0. Si "dibujar" es true, redibuja el estado inicial.
-    reiniciar(dibujar = true) {
+  reiniciar(dibujar = true) {
     this.pausar();
     this.tFisico = 0;
     this._acumulador = 0;
-    this.renderer.limpiarRecorrido();   // borra la línea morada
     if (dibujar) this._dibujar();
   }
 
@@ -49,11 +50,17 @@ class Animator {
     this.velocidad = Math.max(0.1, v);
   }
 
-  // Cambia de motor (cuando el usuario elige otro movimiento).
-    setMotor(motor) {
+  // Cambia de motor (cuando el usuario elige otro movimiento o nuevos datos).
+  setMotor(motor) {
     this.motor = motor;
-    this.renderer.ajustarEscala(motor);   // recalcula escala y trayectoria del nuevo motor
+    this._ajustarEscala();
     this.reiniciar();
+  }
+
+  _ajustarEscala() {
+    if (this.renderer.ajustarEscalaAlMotor) {
+      this.renderer.ajustarEscalaAlMotor(this.motor);
+    }
   }
 
   _bucle(ahora) {
@@ -73,16 +80,21 @@ class Animator {
 
     if (this.tFisico >= this.motor.tiempoTotal) {
       this.tFisico = this.motor.tiempoTotal;         // queda exactamente al final
+      this._acumulador = 0;
       this._dibujar();
       this.corriendo = false;
       return;
     }
 
-    this._dibujar();
+    this._dibujar(true);                             // interpola entre pasos
     this._idFrame = requestAnimationFrame(this._bucle);
   }
 
-  _dibujar() {
-    this.renderer.dibujarEscena(this.motor.posicion(this.tFisico));
+  // Con interpolar = true se dibuja en tFisico + lo que sobró del acumulador.
+  _dibujar(interpolar = false) {
+    let t = this.tFisico;
+    if (interpolar) t += this._acumulador;
+    t = Math.min(t, this.motor.tiempoTotal);
+    this.renderer.dibujarEscena(this.motor.posicion(t));
   }
 }
