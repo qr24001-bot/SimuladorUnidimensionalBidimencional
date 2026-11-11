@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Pruebas de animación</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    #resumen { font-size: 1.2em; font-weight: bold; margin: 12px 0; }
+    .linea { font-family: monospace; font-size: 13px; padding: 2px 0; }
+    .pasa { color: #1a7f37; }
+    .falla { color: #c92a2a; font-weight: bold; }
+    canvas { border: 1px solid #ccc; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <h3>Pruebas formales de animación</h3>
+  <div id="resumen">Ejecutando…</div>
+  <div id="salida"></div>
+  <canvas id="lienzo" width="700" height="400"></canvas>
+
+  <script src="../js/simulation/renderer.js"></script>
+  <script src="../js/simulation/animator.js"></script>
+  <script src="../tests/pruebas-animacion.js"></script>
+  <script>
+    const g = 9.8;
+
+    // Motores de prueba. Cuando existan los motores reales de tus compañeros,
+    // agrégalos a esta lista con el mismo formato.
+    const motores = [
+      {
+        nombre: "Caída libre (falso)",
+        es2D: false,
+        motor: {
+          tiempoTotal: Math.sqrt((2 * 20) / g),
+          posicion: (t) => ({ x: 0, y: 20 - 0.5 * g * t * t }),
+        },
+      },
+      {
+        nombre: "Parabólico (falso)",
+        es2D: true,
+        motor: {
+          tiempoTotal: (2 * 20 * Math.sin(Math.PI / 4)) / g,
+          posicion: (t) => ({
+            x: 20 * Math.cos(Math.PI / 4) * t,
+            y: 20 * Math.sin(Math.PI / 4) * t - 0.5 * g * t * t,
+          }),
+        },
+      },
+      {
+        nombre: "Caída libre 2 m",
+        es2D: false,
+        motor: {
+          tiempoTotal: Math.sqrt((2 * 2) / g),
+          posicion: (t) => ({ x: 0, y: 2 - 0.5 * g * t * t }),
+        },
+      },
+      {
+        nombre: "Caída libre 200 m",
+        es2D: false,
+        motor: {
+          tiempoTotal: Math.sqrt((2 * 200) / g),
+          posicion: (t) => ({ x: 0, y: 200 - 0.5 * g * t * t }),
+        },
+      },
+    ];
+
+    const salida = document.getElementById("salida");
+    function mostrar(ok, nombre, detalle) {
+      const div = document.createElement("div");
+      div.className = "linea " + (ok ? "pasa" : "falla");
+      div.textContent = (ok ? "PASA  " : "FALLA ") + nombre + "  |  " + detalle;
+      salida.appendChild(div);
+      console.log(div.textContent);
+    }
+
+    const { total, fallas } = pruebasAnimacion(motores, "lienzo", mostrar);
+    const resumen = document.getElementById("resumen");
+    resumen.textContent = fallas === 0
+      ? `✔ Todas las pruebas pasan (${total}/${total})`
+      : `✘ Fallan ${fallas} de ${total} pruebas`;
+    resumen.className = fallas === 0 ? "pasa" : "falla";
+  </script>
+</body>
+</html>
