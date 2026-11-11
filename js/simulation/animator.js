@@ -37,10 +37,11 @@ class Animator {
   }
 
   // Vuelve a t = 0. Si "dibujar" es true, redibuja el estado inicial.
-  reiniciar(dibujar = true) {
+    reiniciar(dibujar = true) {
     this.pausar();
     this.tFisico = 0;
     this._acumulador = 0;
+    this.renderer.limpiarRecorrido();   // borra la línea morada
     if (dibujar) this._dibujar();
   }
 
@@ -49,8 +50,9 @@ class Animator {
   }
 
   // Cambia de motor (cuando el usuario elige otro movimiento).
-  setMotor(motor) {
+    setMotor(motor) {
     this.motor = motor;
+    this.renderer.ajustarEscala(motor);   // recalcula escala y trayectoria del nuevo motor
     this.reiniciar();
   }
 

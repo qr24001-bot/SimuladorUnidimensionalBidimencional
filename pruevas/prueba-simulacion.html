@@ -53,11 +53,8 @@
     const motor = parabolicoFalso;     // prueba también: parabolicoFalso
     const es2D = motor === parabolicoFalso;
 
-    Renderer.iniciar("lienzo", {
-      centrarX: !es2D,
-      xMax: es2D ? 42 : 0,
-      yMax: es2D ? 11 : h0,
-    });
+        Renderer.iniciar("lienzo", { centrarX: !es2D });
+    Renderer.ajustarEscala(motor);
 
     const animador = new Animator(motor, Renderer);
 

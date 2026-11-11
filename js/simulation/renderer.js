@@ -8,7 +8,10 @@ const Renderer = (() => {
   let origenX = 0;            // posición en px del (0, 0) físico
   let origenY = 0;
   const margen = { izq: 60, der: 30, arriba: 30, abajo: 40 };
-  let centrarX = false;       // true para movimientos verticales (1D)
+  let centrarX = false;  
+  let curva=[];
+  let recorrido=[];
+       // true para movimientos verticales (1D)
 
   // Inicia el renderer con el id del <canvas>.
   function iniciar(idCanvas, opciones = {}) {
@@ -21,6 +24,7 @@ const Renderer = (() => {
   // Calcula la escala para que quepa toda la trayectoria.
   // xMax y yMax son las distancias máximas en metros que se van a dibujar.
   function configurarEscala(xMax, yMax) {
+
     const anchoUtil = canvas.width - margen.izq - margen.der;
     const altoUtil = canvas.height - margen.arriba - margen.abajo;
 
@@ -31,6 +35,41 @@ const Renderer = (() => {
 
     origenX = centrarX ? canvas.width / 2 : margen.izq;
     origenY = canvas.height - margen.abajo;
+  }
+    // Muestrea el motor, calcula los límites y configura la escala sola.
+  function ajustarEscala(motor, muestras = 200) {
+    curva = [];
+    recorrido = [];
+    let xMax = 0, yMax = 0;
+    for (let i = 0; i <= muestras; i++) {
+      const t = (i / muestras) * motor.tiempoTotal;
+      const { x, y } = motor.posicion(t);
+      curva.push({ x, y });
+      xMax = Math.max(xMax, Math.abs(x));
+      yMax = Math.max(yMax, y);
+    }
+    // Margen del 10%; si está centrado, el ancho cubre -xMax..+xMax
+    const factorX = centrarX ? 2 : 1;
+    configurarEscala(xMax * 1.1 * factorX, yMax * 1.1);
+  }
+
+  function limpiarRecorrido() {
+    recorrido = [];
+  }
+
+  function trazarLinea(puntos, color, grosor, discontinua) {
+    if (puntos.length < 2) return;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = grosor;
+    ctx.setLineDash(discontinua ? [6, 6] : []);
+    ctx.beginPath();
+    puntos.forEach((p, i) => {
+      const { px, py } = metrosAPixeles(p.x, p.y);
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
   }
 
   // Convierte metros a píxeles (invierte Y porque en Canvas crece hacia abajo).
@@ -101,20 +140,24 @@ const Renderer = (() => {
 
   function dibujarParticula(x, y) {
     const { px, py } = metrosAPixeles(x, y);
-    ctx.fillStyle = "#d9480f";
+    ctx.fillStyle = "#920fd9";
     ctx.beginPath();
     ctx.arc(px, py, 8, 0, Math.PI * 2);
     ctx.fill();
   }
 
   // Dibuja un cuadro completo. "pos" puede ser {x, y} o un número (solo Y).
-  function dibujarEscena(pos) {
+    function dibujarEscena(pos) {
     const p = typeof pos === "number" ? { x: 0, y: pos } : pos;
+    recorrido.push(p);
     limpiar();
     dibujarSuelo();
     dibujarEjes();
+    trazarLinea(curva, "#cccccc", 1, true);       // trayectoria completa, tenue
+    trazarLinea(recorrido, "#920fd9", 2, false);  // parte ya recorrida
     dibujarParticula(p.x, p.y);
   }
+  
 
-  return { iniciar, configurarEscala, metrosAPixeles, dibujarEscena, limpiar };
-})();
+    return { iniciar, configurarEscala, ajustarEscala, limpiarRecorrido, metrosAPixeles, dibujarEscena, limpiar };
+})();  
