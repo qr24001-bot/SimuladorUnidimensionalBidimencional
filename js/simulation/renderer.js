@@ -1,7 +1,7 @@
 ﻿
 // simulation/renderer.js
-// Dibuja la escena en Canvas: ejes, suelo, partícula y escala metros a píxeles.
-// No calcula física: solo recibe posiciones en metros y las dibuja.
+// Dibuja la escena en Canvas: ejes, suelo, partícula y escala.
+// No calcula física: recibe posiciones en metros y las dibuja.
 
 const Renderer = (() => {
   let canvas, ctx;
@@ -22,41 +22,73 @@ const Renderer = (() => {
   // Inicia el renderer con el id del canvas.
   function iniciar(idCanvas, opciones = {}) {
     canvas = document.getElementById(idCanvas);
+
+    if (!canvas) {
+      throw new Error(`No se encontró el canvas: ${idCanvas}`);
+    }
+
     ctx = canvas.getContext("2d");
 
     centrarX = opciones.centrarX ?? false;
     ultima = null;
 
-    configurarEscala(
-      opciones.xMax ?? 10,
-      opciones.yMax ?? 10
-    );
+    configurarEscala(opciones);
   }
 
-  // Calcula la escala para que quepa toda la trayectoria.
-  function configurarEscala(xMax, yMax) {
+  // Calcula la escala usando los límites reales.
+  function configurarEscala(opciones = {}, yMaxAnterior) {
+    if (typeof opciones === "number") {
+      opciones = {
+        xMin: 0,
+        xMax: opciones,
+        yMin: 0,
+        yMax: yMaxAnterior ?? 10
+      };
+    }
+
+    const xMin = Math.min(0, opciones.xMin ?? 0);
+    const xMax = Math.max(0, opciones.xMax ?? 10);
+    const yMin = Math.min(0, opciones.yMin ?? 0);
+    const yMax = Math.max(0, opciones.yMax ?? 10);
+
+    if (centrarX && xMin === 0 && xMax === 0) {
+      // Se conserva espacio a ambos lados del eje Y.
+      origenX = canvas.width / 2;
+    }
+
     const anchoUtil = canvas.width - margen.izq - margen.der;
     const altoUtil = canvas.height - margen.arriba - margen.abajo;
 
-    const escalaX = xMax > 0 ? anchoUtil / xMax : Infinity;
-    const escalaY = yMax > 0 ? altoUtil / yMax : Infinity;
+    const rangoX = xMax - xMin;
+    const rangoY = yMax - yMin;
+
+    const escalaX = rangoX > 0 ? anchoUtil / rangoX : Infinity;
+    const escalaY = rangoY > 0 ? altoUtil / rangoY : Infinity;
 
     escala = Math.min(escalaX, escalaY);
 
-    if (!isFinite(escala)) {
+    if (!Number.isFinite(escala) || escala <= 0) {
       escala = 10;
     }
 
-    origenX = centrarX ? canvas.width / 2 : margen.izq;
-    origenY = canvas.height - margen.abajo;
+    if (!(centrarX && xMin === 0 && xMax === 0)) {
+      origenX = margen.izq - xMin * escala;
+    }
+
+    origenY = margen.arriba + yMax * escala;
   }
 
   // Convierte metros a píxeles.
-  // En Canvas el eje Y crece hacia abajo.
   function metrosAPixeles(x, y) {
+    const px = origenX + x * escala;
+    const py = origenY - y * escala;
+
+    // Se conservan ambos formatos para compatibilidad.
     return {
-      px: origenX + x * escala,
-      py: origenY - y * escala
+      x: px,
+      y: py,
+      px,
+      py
     };
   }
 
@@ -69,17 +101,15 @@ const Renderer = (() => {
     ctx.lineWidth = 2;
 
     ctx.beginPath();
-    ctx.moveTo(0, origenY);
-    ctx.lineTo(canvas.width, origenY);
+    ctx.moveTo(margen.izq, origenY);
+    ctx.lineTo(canvas.width - margen.der, origenY);
     ctx.stroke();
   }
 
-  // Evita mostrar decimales innecesarios.
   function formatear(m) {
     return Number(m.toFixed(2)).toString();
   }
 
-  // Redondea a un paso bonito: 1, 2, 5, 10, 20, 50, 100...
   function pasoBonito(valor) {
     if (valor <= 0) return 1;
 
@@ -100,45 +130,49 @@ const Renderer = (() => {
     ctx.fillStyle = "#666";
     ctx.font = "12px sans-serif";
 
-    // Eje Y.
     ctx.beginPath();
-    ctx.moveTo(origenX, origenY);
-    ctx.lineTo(origenX, margen.arriba);
+    ctx.moveTo(origenX, margen.arriba);
+    ctx.lineTo(origenX, canvas.height - margen.abajo);
     ctx.stroke();
 
     const paso = pasoBonito(40 / escala);
 
-    // Marcas en Y.
-    // Se utiliza un contador entero para evitar errores decimales.
-    for (
-      let i = 1;
-      origenY - i * paso * escala > margen.arriba;
-      i++
-    ) {
-      const m = i * paso;
-      const py = origenY - m * escala;
+    for (const signo of [1, -1]) {
+      for (let i = 1; i <= 100; i++) {
+        const m = signo * i * paso;
+        const py = origenY - m * escala;
 
-      ctx.beginPath();
-      ctx.moveTo(origenX - 4, py);
-      ctx.lineTo(origenX + 4, py);
-      ctx.stroke();
+        if (
+          py <= margen.arriba ||
+          py >= canvas.height - margen.abajo
+        ) {
+          break;
+        }
 
-      ctx.fillText(
-        formatear(m) + " m",
-        origenX - 50,
-        py + 4
-      );
+        ctx.beginPath();
+        ctx.moveTo(origenX - 4, py);
+        ctx.lineTo(origenX + 4, py);
+        ctx.stroke();
+
+        ctx.fillText(
+          formatear(m) + " m",
+          origenX - 52,
+          py + 4
+        );
+      }
     }
 
-    // Marcas en X (solo cuando el origen está a la izquierda).
-    if (!centrarX) {
-      for (
-        let i = 1;
-        origenX + i * paso * escala < canvas.width - margen.der;
-        i++
-      ) {
-        const m = i * paso;
+    for (const signo of [1, -1]) {
+      for (let i = 1; i <= 100; i++) {
+        const m = signo * i * paso;
         const px = origenX + m * escala;
+
+        if (
+          px <= margen.izq ||
+          px >= canvas.width - margen.der
+        ) {
+          break;
+        }
 
         ctx.beginPath();
         ctx.moveTo(px, origenY - 4);
@@ -155,23 +189,32 @@ const Renderer = (() => {
   }
 
   function dibujarParticula(x, y) {
-    const { px, py } = metrosAPixeles(x, y);
+    const pixel = metrosAPixeles(x, y);
 
-    // Guardar la última posición dibujada para las pruebas.
-    ultima = { x, y, px, py };
+    ultima = {
+      x,
+      y,
+      px: pixel.px,
+      py: pixel.py
+    };
 
     ctx.fillStyle = "#d9480f";
     ctx.beginPath();
-    ctx.arc(px, py, 8, 0, Math.PI * 2);
+    ctx.arc(pixel.px, pixel.py, 8, 0, Math.PI * 2);
     ctx.fill();
   }
 
-  // Dibuja un cuadro completo.
-  // Acepta {x, y} o un número (solo Y).
-  function dibujarEscena(pos) {
-    const p = typeof pos === "number"
-      ? { x: 0, y: pos }
-      : pos;
+  // Acepta dibujarEscena(x, y), {x, y} o un número.
+  function dibujarEscena(pos, y) {
+    let p;
+
+    if (typeof pos === "number" && typeof y === "number") {
+      p = { x: pos, y };
+    } else if (typeof pos === "number") {
+      p = { x: 0, y: pos };
+    } else {
+      p = pos;
+    }
 
     limpiar();
     dibujarSuelo();
@@ -179,7 +222,6 @@ const Renderer = (() => {
     dibujarParticula(p.x, p.y);
   }
 
-  // Devuelve la última posición dibujada.
   function ultimaPosicion() {
     return ultima;
   }

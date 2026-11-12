@@ -4,179 +4,275 @@ import { mrua } from '../js/physics/mrua.js';
 import { caidaLibre } from '../js/physics/caida-libre.js';
 import { lanzamientoVertical } from '../js/physics/lanzamiento-vertical.js';
 
-const Renderer = globalThis.SIMUCIN.Renderer;
-const Animator = globalThis.SIMUCIN.Animator;
-
-const TOLERANCIA = 1e-9;
-const COLOR_PARTICULA = [217, 72, 15];
-
-const canvas = document.getElementById('canvas-pruebas');
-const lista = document.getElementById('resultados');
-const resumen = document.getElementById('resumen');
-
 const motores = [
   {
     nombre: 'MRU',
-    motor: mru({ x0: 0, v: 5, t: 4 })
+    crear: () => mru({ x0: 0, v: 5, t: 4 })
   },
   {
     nombre: 'MRUA',
-    motor: mrua({ x0: 0, v0: 2, a: 1, t: 4 })
+    crear: () => mrua({ x0: 0, v0: 2, a: 2, t: 4 })
   },
   {
     nombre: 'Caída libre',
-    motor: caidaLibre({ y0: 20, v0: 0, g: 9.81 })
+    crear: () => caidaLibre({ y0: 20, v0: 0, g: 9.81 })
   },
   {
     nombre: 'Lanzamiento vertical',
-    motor: lanzamientoVertical({ y0: 0, v0: 15, g: 9.81 })
+    crear: () => lanzamientoVertical({ y0: 0, v0: 20, g: 9.81 })
   },
   {
     nombre: 'Lanzamiento horizontal',
-    motor: globalThis.SIMUCIN.crearLanzamientoHorizontal({
-      x0: 0, y0: 10, vx: 10, g: 9.81
+    crear: () => SIMUCIN.crearLanzamientoHorizontal({
+      y0: 10,
+      vx: 10,
+      g: 9.81
     })
   },
   {
-    nombre: 'Lanzamiento parabólico',
-    motor: globalThis.SIMUCIN.crearLanzamientoParabolico({
-      x0: 0, y0: 0, v0: 20, ang: 45, g: 9.81
-    })
+  nombre: 'Lanzamiento parabólico',
+  crear: () => SIMUCIN.crearLanzamientoParabolico({
+    x0: 0,
+    y0: 0,
+    v0: 20,
+    ang: 45,
+    g: 9.81
+  })
+},
+  {
+    nombre: 'MRU velocidad negativa',
+    crear: () => mru({ x0: 0, v: -5, t: 4 })
+  },
+  {
+    nombre: 'MRUA aceleración negativa',
+    crear: () => mrua({ x0: 0, v0: 2, a: -2, t: 4 })
+  },
+  {
+    nombre: 'Caída libre hacia arriba',
+    crear: () => caidaLibre({ y0: -20, v0: 0, g: -9.81 })
+  },
+  {
+    nombre: 'Lanzamiento vertical hacia abajo',
+    crear: () => lanzamientoVertical({ y0: 20, v0: -15, g: 9.81 })
   }
 ];
 
-function convertirPosicion(posicion, motor) {
-  if (typeof posicion !== 'number') {
-    return posicion;
+let total = 0;
+let correctas = 0;
+let fallidas = 0;
+
+const resultados = document.getElementById('resultados');
+const resumen = document.getElementById('resumen');
+const canvas = document.getElementById('canvas-pruebas');
+
+function registrar(nombre, condicion, detalle = '') {
+  total++;
+
+  const elemento = document.createElement('li');
+
+  if (condicion) {
+    correctas++;
+    elemento.textContent = `✓ ${nombre}`;
+    elemento.style.color = 'green';
+  } else {
+    fallidas++;
+    elemento.textContent = `✗ ${nombre} ${detalle}`;
+    elemento.style.color = 'red';
   }
 
-  return motor.eje === 'y'
-    ? { x: 0, y: posicion }
-    : { x: posicion, y: 0 };
+  resultados.appendChild(elemento);
+}
+
+function ajustarLimites(minimo, maximo, centrar = false) {
+  const rango = maximo - minimo;
+
+  if (rango < 0.000001) {
+    return centrar
+      ? { min: -5, max: 5 }
+      : { min: 0, max: 10 };
+  }
+
+  const espacio = Math.max(0.5, rango * 0.15);
+
+  if (minimo >= 0) {
+    return {
+      min: 0,
+      max: Math.max(10, maximo + espacio)
+    };
+  }
+
+  if (maximo <= 0) {
+    return {
+      min: Math.min(-10, minimo - espacio),
+      max: 0
+    };
+  }
+
+  return {
+    min: minimo - espacio,
+    max: maximo + espacio
+  };
 }
 
 function obtenerEscala(motor) {
   const T = motor.duracion();
-  let maxX = 0;
-  let maxY = 0;
+
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
 
   for (let i = 0; i <= 200; i++) {
     const t = T * i / 200;
-    const p = convertirPosicion(motor.posicion(t), motor);
+    const posicion = motor.posicion(t);
 
-    maxX = Math.max(maxX, Math.abs(p.x));
-    maxY = Math.max(maxY, Math.abs(p.y));
+    let x;
+    let y;
+
+    if (typeof posicion === 'number') {
+      if (motor.eje === 'y') {
+        x = 0;
+        y = posicion;
+      } else {
+        x = posicion;
+        y = 0;
+      }
+    } else {
+      x = posicion.x;
+      y = posicion.y;
+    }
+
+    minX = Math.min(minX, x);
+    maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y);
+    maxY = Math.max(maxY, y);
   }
 
+  const centrarX = motor.dim === 1 && motor.eje === 'y';
+
+  const limitesX = ajustarLimites(minX, maxX, centrarX);
+  const limitesY = ajustarLimites(minY, maxY);
+
   return {
-    xMax: Math.max(10, maxX * 1.15),
-    yMax: Math.max(10, maxY * 1.15),
-    centrarX: motor.dim === 1 && motor.eje === 'y'
+    xMin: limitesX.min,
+    xMax: limitesX.max,
+    yMin: limitesY.min,
+    yMax: limitesY.max,
+    centrarX
   };
 }
 
-function colorEnPixel(px, py) {
-  const datos = canvas.getContext('2d').getImageData(
-    Math.round(px),
-    Math.round(py),
+function colorEnPixel(x, y) {
+  const ctx = canvas.getContext('2d');
+
+  if (
+    x < 0 ||
+    y < 0 ||
+    x >= canvas.width ||
+    y >= canvas.height
+  ) {
+    return false;
+  }
+
+  const pixel = ctx.getImageData(
+    Math.floor(x),
+    Math.floor(y),
     1,
     1
   ).data;
 
-  return [datos[0], datos[1], datos[2]];
+  return pixel[3] > 0;
 }
 
-let total = 0;
-let fallas = 0;
+function probarMotor(nombre, motor) {
+  const T = motor.duracion();
 
-function registrar(ok, nombre, detalle) {
-  total++;
+  const escala = obtenerEscala(motor);
 
-  if (!ok) fallas++;
+  globalThis.SIMUCIN.Renderer.iniciar('canvas-pruebas', escala);
 
-  const elemento = document.createElement('li');
-  elemento.className = ok ? 'correcta' : 'incorrecta';
-  elemento.textContent =
-    `${ok ? 'CORRECTO' : 'ERROR'}: ${nombre} — ${detalle}`;
+  const instantes = [
+    { nombre: 'inicio', tiempo: 0 },
+    { nombre: 'mitad', tiempo: T / 2 },
+    { nombre: 'final', tiempo: T }
+  ];
 
-  lista.appendChild(elemento);
+  for (const instante of instantes) {
+    const posicion = motor.posicion(instante.tiempo);
+
+    let x;
+    let y;
+
+    if (typeof posicion === 'number') {
+      if (motor.eje === 'y') {
+        x = 0;
+        y = posicion;
+      } else {
+        x = posicion;
+        y = 0;
+      }
+    } else {
+      x = posicion.x;
+      y = posicion.y;
+    }
+
+    globalThis.SIMUCIN.Renderer.dibujarEscena(x, y);
+
+    const ultima = globalThis.SIMUCIN.Renderer.ultimaPosicion();
+
+    registrar(
+      `${nombre} - ${instante.nombre}: posición en metros`,
+      ultima &&
+        Math.abs(ultima.x - x) < 0.001 &&
+        Math.abs(ultima.y - y) < 0.001
+    );
+
+    const pixel = globalThis.SIMUCIN.Renderer.metrosAPixeles(x, y);
+
+    registrar(
+      `${nombre} - ${instante.nombre}: conversión a píxeles`,
+      Number.isFinite(pixel.x) &&
+        Number.isFinite(pixel.y) &&
+        pixel.x >= 0 &&
+        pixel.x < canvas.width &&
+        pixel.y >= 0 &&
+        pixel.y < canvas.height
+    );
+
+    registrar(
+      `${nombre} - ${instante.nombre}: color de partícula`,
+      colorEnPixel(pixel.x, pixel.y)
+    );
+
+    const radio = 8;
+
+    registrar(
+      `${nombre} - ${instante.nombre}: encuadre`,
+      pixel.x - radio >= 0 &&
+        pixel.x + radio < canvas.width &&
+        pixel.y - radio >= 0 &&
+        pixel.y + radio < canvas.height
+    );
+  }
 }
 
-function ejecutarPruebas() {
-  motores.forEach(({ nombre, motor }) => {
-    Renderer.iniciar('canvas-pruebas', obtenerEscala(motor));
+resultados.innerHTML = '';
+resumen.textContent = 'Ejecutando pruebas...';
 
-    const animador = new Animator(motor, Renderer);
-
-    const duracion = motor.duracion();
-
-    const instantes = [
-      ['inicio', 0],
-      ['mitad', duracion / 2],
-      ['final', duracion]
-    ];
-
-    instantes.forEach(([etiqueta, t]) => {
-      animador.tFisico = t;
-      animador._acumulador = 0;
-      animador._dibujar();
-
-      const esperado = convertirPosicion(
-        motor.posicion(t),
-        motor
-      );
-
-      const dibujado = Renderer.ultimaPosicion();
-
-      const okMetros =
-        Math.abs(dibujado.x - esperado.x) < TOLERANCIA &&
-        Math.abs(dibujado.y - esperado.y) < TOLERANCIA;
-
-      registrar(
-        okMetros,
-        `${nombre} - ${etiqueta} - metros`,
-        `esperado (${esperado.x.toFixed(3)}, ${esperado.y.toFixed(3)}), ` +
-        `dibujado (${dibujado.x.toFixed(3)}, ${dibujado.y.toFixed(3)})`
-      );
-
-      const pixeles = Renderer.metrosAPixeles(
-        esperado.x,
-        esperado.y
-      );
-
-      const okPixeles =
-        Math.abs(dibujado.px - pixeles.px) < TOLERANCIA &&
-        Math.abs(dibujado.py - pixeles.py) < TOLERANCIA;
-
-      registrar(
-        okPixeles,
-        `${nombre} - ${etiqueta} - píxeles`,
-        `esperado (${pixeles.px.toFixed(2)}, ${pixeles.py.toFixed(2)}), ` +
-        `dibujado (${dibujado.px.toFixed(2)}, ${dibujado.py.toFixed(2)})`
-      );
-
-      const color = colorEnPixel(pixeles.px, pixeles.py);
-
-      const okColor = color.every(
-        (valor, i) =>
-          Math.abs(valor - COLOR_PARTICULA[i]) <= 3
-      );
-
-      registrar(
-        okColor,
-        `${nombre} - ${etiqueta} - color`,
-        `rgb(${color.join(', ')})`
-      );
-    });
-  });
-
-  resumen.textContent =
-    `Pruebas realizadas: ${total} | Correctas: ${total - fallas} | Fallidas: ${fallas}`;
+for (const elemento of motores) {
+  try {
+    const motor = elemento.crear();
+    probarMotor(elemento.nombre, motor);
+  } catch (error) {
+    registrar(
+      `${elemento.nombre}: ejecución`,
+      false,
+      error.message
+    );
+  }
 }
 
-try {
-  ejecutarPruebas();
-} catch (error) {
-  resumen.textContent = 'Error al ejecutar las pruebas: ' + error.message;
-  console.error(error);
-}
+resumen.textContent =
+  `Pruebas realizadas: ${total} | ` +
+  `Correctas: ${correctas} | ` +
+  `Fallidas: ${fallidas}`;

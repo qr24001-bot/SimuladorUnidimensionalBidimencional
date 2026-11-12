@@ -135,12 +135,50 @@ function obtenerEcuaciones(motor) {
 }
 
 
-// Obtener las dimensiones máximas de la trayectoria
+// Ajustar los límites para mostrar posiciones positivas y negativas
+function ajustarLimites(minimo, maximo, centrar = false) {
+  const rango = maximo - minimo;
+
+  if (rango < 0.000001) {
+    return centrar
+      ? { min: -5, max: 5 }
+      : { min: 0, max: 10 };
+  }
+
+  const espacio = Math.max(0.5, rango * 0.15);
+
+  // Trayectoria completamente positiva
+  if (minimo >= 0) {
+    return {
+      min: 0,
+      max: Math.max(10, maximo + espacio)
+    };
+  }
+
+  // Trayectoria completamente negativa
+  if (maximo <= 0) {
+    return {
+      min: Math.min(-10, minimo - espacio),
+      max: 0
+    };
+  }
+
+  // Trayectoria que cruza el origen
+  return {
+    min: minimo - espacio,
+    max: maximo + espacio
+  };
+}
+
+
+// Obtener las dimensiones máximas y mínimas de la trayectoria
 function obtenerEscala(motor) {
   const T = motor.duracion();
 
-  let maxX = 0;
-  let maxY = 0;
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
 
   for (let i = 0; i <= 200; i++) {
     const t = T * i / 200;
@@ -162,14 +200,23 @@ function obtenerEscala(motor) {
       y = posicion.y;
     }
 
-    maxX = Math.max(maxX, Math.abs(x));
-    maxY = Math.max(maxY, Math.abs(y));
+    minX = Math.min(minX, x);
+    maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y);
+    maxY = Math.max(maxY, y);
   }
 
+  const centrarX = motor.dim === 1 && motor.eje === 'y';
+
+  const limitesX = ajustarLimites(minX, maxX, centrarX);
+  const limitesY = ajustarLimites(minY, maxY);
+
   return {
-    xMax: Math.max(10, maxX * 1.15),
-    yMax: Math.max(10, maxY * 1.15),
-    centrarX: motor.dim === 1 && motor.eje === 'y'
+    xMin: limitesX.min,
+    xMax: limitesX.max,
+    yMin: limitesY.min,
+    yMax: limitesY.max,
+    centrarX
   };
 }
 
@@ -248,7 +295,7 @@ iniciarFormulario((movimiento, crudos) => {
       motor
     );
 
-    // Configurar el renderer según el movimiento.
+    // Configurar el renderer según los límites de la trayectoria.
     const escala = obtenerEscala(motor);
 
     Renderer.iniciar('canvas-simulacion', escala);

@@ -5,73 +5,81 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pruebas de animación - SIMUCIN</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
       max-width: 1000px;
       margin: 30px auto;
       padding: 20px;
-      background: #f4f4f4;
+      background: #f5f5f5;
       color: #222;
     }
 
-    h1, h2 {
+    h1 {
       text-align: center;
+    }
+
+    #resumen {
+      padding: 15px;
+      margin: 20px 0;
+      background: #e5e7eb;
+      border-radius: 8px;
+      font-weight: bold;
     }
 
     canvas {
       display: block;
       width: 100%;
+      max-width: 700px;
+      margin: 20px auto;
       background: white;
-      border: 1px solid #aaa;
-      margin: 20px 0;
+      border: 1px solid #ccc;
     }
 
-    #resumen {
-      font-weight: bold;
-      padding: 12px;
-      background: white;
+    ul {
+      padding: 0;
+      list-style: none;
     }
 
-    #resultados {
-      background: white;
-      padding: 20px 35px;
+    li {
+      padding: 9px;
+      margin: 5px 0;
+      border-radius: 5px;
+      overflow-wrap: anywhere;
     }
 
     .correcta {
-      color: green;
+      background: #d1fae5;
+      color: #065f46;
     }
 
     .incorrecta {
-      color: red;
+      background: #fee2e2;
+      color: #991b1b;
     }
   </style>
 </head>
 
 <body>
-  <h1>SIMUCIN</h1>
-  <h2>Pruebas de animación</h2>
-
-  <p>
-    Comprobación de la posición dibujada, conversión a píxeles
-    y color de la partícula en los seis movimientos.
-  </p>
-
-  <canvas id="canvas-pruebas" width="900" height="500"></canvas>
+  <h1>Pruebas de animación SIMUCIN</h1>
 
   <div id="resumen">Ejecutando pruebas...</div>
 
-  <ol id="resultados"></ol>
+  <canvas id="canvas-pruebas" width="700" height="400"></canvas>
 
-  <!-- Motores clásicos 2D -->
+  <h2>Resultados</h2>
+  <ul id="resultados"></ul>
+
+  <!-- Motores bidimensionales: scripts clásicos -->
   <script src="../js/physics/lanzamiento-horizontal.js"></script>
   <script src="../js/physics/lanzamiento-parabolico.js"></script>
 
-  <!-- Sistema de animación -->
-  <script src="../js/simulation/renderer.js"></script>
-  <script src="../js/simulation/animator.js"></script>
+  <!-- Renderer y Animator -->
+  <script type="module" src="../js/simulation/renderer.js"></script>
+  <script type="module" src="../js/simulation/animator.js"></script>
 
-  <!-- Pruebas con los motores reales -->
+  <!-- Pruebas -->
   <script type="module" src="./pruebas-animacion.js"></script>
 </body>
 </html>
