@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pruebas de animación - SIMUCIN</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 20px;
+      background: #f4f4f4;
+      color: #222;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      background: white;
+      border: 1px solid #aaa;
+      margin: 20px 0;
+    }
+
+    #resumen {
+      font-weight: bold;
+      padding: 12px;
+      background: white;
+    }
+
+    #resultados {
+      background: white;
+      padding: 20px 35px;
+    }
+
+    .correcta {
+      color: green;
+    }
+
+    .incorrecta {
+      color: red;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>SIMUCIN</h1>
+  <h2>Pruebas de animación</h2>
+
+  <p>
+    Comprobación de la posición dibujada, conversión a píxeles
+    y color de la partícula en los seis movimientos.
+  </p>
+
+  <canvas id="canvas-pruebas" width="900" height="500"></canvas>
+
+  <div id="resumen">Ejecutando pruebas...</div>
+
+  <ol id="resultados"></ol>
+
+  <!-- Motores clásicos 2D -->
+  <script src="../js/physics/lanzamiento-horizontal.js"></script>
+  <script src="../js/physics/lanzamiento-parabolico.js"></script>
+
+  <!-- Sistema de animación -->
+  <script src="../js/simulation/renderer.js"></script>
+  <script src="../js/simulation/animator.js"></script>
+
+  <!-- Pruebas con los motores reales -->
+  <script type="module" src="./pruebas-animacion.js"></script>
+</body>
+</html>

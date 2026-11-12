@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Movimiento en 1D | Simulador Unidimensional Bidimensional</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
+
 <body class="pagina-simulador" data-modo="1d">
 
   <header class="encabezado encabezado-compacto">
@@ -88,7 +90,7 @@
       <h2 id="titulo-simulacion">2. Simulación</h2>
 
       <canvas id="canvas-simulacion" width="800" height="360"
-              aria-label="Animación del movimiento de la partícula"></canvas>
+        aria-label="Animación del movimiento de la partícula"></canvas>
 
       <div class="controles">
         <button type="button" id="btn-iniciar" class="boton">Iniciar</button>
@@ -112,10 +114,16 @@
       <div class="tabla-contenedor">
         <table id="tabla-resultados" class="tabla">
           <thead>
-            <tr><th>Magnitud</th><th>Valor</th><th>Unidad</th></tr>
+            <tr>
+              <th>Magnitud</th>
+              <th>Valor</th>
+              <th>Unidad</th>
+            </tr>
           </thead>
           <tbody>
-            <tr><td colspan="3" class="vacio">Presiona «Simular» para ver los resultados.</td></tr>
+            <tr>
+              <td colspan="3" class="vacio">Presiona «Simular» para ver los resultados.</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -145,6 +153,12 @@
     </div>
   </footer>
 
-  <script type="module" src="../js/main.js"></script>
+  <script src="../js/vendor/chart.umd.min.js"></script>
+
+<script src="../js/simulation/renderer.js"></script>
+<script src="../js/simulation/animator.js"></script>
+
+<script type="module" src="../js/main.js"></script>
 </body>
+
 </html>
