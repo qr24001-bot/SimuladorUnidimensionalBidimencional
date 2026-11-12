@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Prueba de simulación</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    canvas { border: 1px solid #ccc; display: block; margin-bottom: 10px; }
+    button, select { margin-right: 6px; padding: 6px 10px; }
+  </style>
+</head>
+<body>
+  <h3>Prueba del renderer y el animador</h3>
+  <canvas id="lienzo" width="700" height="400"></canvas>
+
+  <button id="btnIniciar">Iniciar</button>
+  <button id="btnPausar">Pausar</button>
+  <button id="btnReiniciar">Reiniciar</button>
+  <label>Velocidad:
+    <select id="selVelocidad">
+      <option value="0.25">0.25x</option>
+      <option value="0.5">0.5x</option>
+      <option value="1" selected>1x</option>
+      <option value="2">2x</option>
+    </select>
+  </label>
+
+  <!-- Orden importante: renderer y animador primero, luego el motor y esta prueba -->
+  <script src="../js/simulation/renderer.js"></script>
+  <script src="../js/simulation/animator.js"></script>
+  <script>
+    // Motor falso con el mismo contrato que acordó el equipo.
+    // Caída libre desde 20 m (1D vertical).
+    const g = 9.8;
+    const h0 = 20;
+    const caidaLibreFalsa = {
+      tiempoTotal: Math.sqrt((2 * h0) / g),
+      posicion: (t) => ({ x: 0, y: h0 - 0.5 * g * t * t }),
+    };
+
+    // Motor falso 2D (parabólico) para probar el modo 2D.
+    // Cambia "motor" abajo por esta constante para probarlo.
+    const v0 = 20, angulo = (45 * Math.PI) / 180;
+    const parabolicoFalso = {
+      tiempoTotal: (2 * v0 * Math.sin(angulo)) / g,
+      posicion: (t) => ({
+        x: v0 * Math.cos(angulo) * t,
+        y: v0 * Math.sin(angulo) * t - 0.5 * g * t * t,
+      }),
+    };
+
+    // --- Elige el motor a probar ---
+    const motor = parabolicoFalso;     // prueba también: parabolicoFalso
+    const es2D = motor === parabolicoFalso;
+
+        Renderer.iniciar("lienzo", { centrarX: !es2D });
+    Renderer.ajustarEscala(motor);
+
+    const animador = new Animator(motor, Renderer);
+
+    document.getElementById("btnIniciar").onclick = () => animador.iniciar();
+    document.getElementById("btnPausar").onclick = () => animador.pausar();
+    document.getElementById("btnReiniciar").onclick = () => animador.reiniciar();
+    document.getElementById("selVelocidad").onchange = (e) =>
+      animador.setVelocidad(parseFloat(e.target.value));
+  </script>
+</body>
+</html>
